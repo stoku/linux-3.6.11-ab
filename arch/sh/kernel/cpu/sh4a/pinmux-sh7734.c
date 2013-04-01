@@ -1735,17 +1735,17 @@ static struct pinmux_cfg_reg pinmux_config_regs[] = {
 		GP_1_0_FN, FN_IP3_20 }
 	},
 	{ PINMUX_CFG_REG("GPSR2", 0xFFFC000C, 32, 1) {
-		GP_2_31_FN, FN_IP4_31_30,
-		GP_2_30_FN, FN_IP5_2_0,
-		GP_2_29_FN, FN_IP5_5_3,
-		GP_2_28_FN, FN_IP5_8_6,
-		GP_2_27_FN, FN_IP5_11_9,
+		GP_2_31_FN, FN_IP5_26_25,
+		GP_2_30_FN, FN_IP5_24_23,
+		GP_2_29_FN, FN_IP5_22_21,
+		GP_2_28_FN, FN_IP5_20_18,
+		GP_2_27_FN, FN_IP5_17_15,
 		GP_2_26_FN, FN_IP5_14_12,
-		GP_2_25_FN, FN_IP5_17_15,
-		GP_2_24_FN, FN_IP5_20_18,
-		GP_2_23_FN, FN_IP5_22_21,
-		GP_2_22_FN, FN_IP5_24_23,
-		GP_2_21_FN, FN_IP5_26_25,
+		GP_2_25_FN, FN_IP5_11_9,
+		GP_2_24_FN, FN_IP5_8_6,
+		GP_2_23_FN, FN_IP5_5_3,
+		GP_2_22_FN, FN_IP5_2_0,
+		GP_2_21_FN, FN_IP4_31_30,
 		GP_2_20_FN, FN_IP4_29_28,
 		GP_2_19_FN, FN_IP4_27_26,
 		GP_2_18_FN, FN_IP4_25_24,
@@ -2265,7 +2265,7 @@ static struct pinmux_cfg_reg pinmux_config_regs[] = {
 		FN_LCD_DATA15_B, 0, 0, 0 }
 	},
 	{ PINMUX_CFG_REG_VAR("IPSR11", 0xFFFC0048, 32,
-			3, 1, 2, 2, 2, 3, 3, 1, 2, 3, 3, 1, 1, 1, 1) {
+			3, 1, 2, 3, 2, 2, 3, 3, 1, 2, 3, 3, 1, 1, 1, 1) {
 	    /* IP11_31_29 [3] */
 	    0, 0, 0, 0, 0, 0, 0, 0,
 	    /* IP11_28 [1] */

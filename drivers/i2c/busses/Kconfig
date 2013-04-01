@@ -632,6 +632,15 @@ config I2C_SH_MOBILE
 	  This driver can also be built as a module.  If so, the module
 	  will be called i2c-sh_mobile.
 
+config I2C_SH7734
+	tristate "Renesas SH7734 I2C Controller"
+	depends on CPU_SUBTYPE_SH7734
+	help
+	  This driver supports the I2C interfaces on the Renesas SH7734.
+
+	  This driver can also be built as a module.  If so, the module
+	  will be called i2c-sh7734.
+
 config I2C_SIMTEC
 	tristate "Simtec Generic I2C interface"
 	select I2C_ALGOBIT

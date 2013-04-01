@@ -27,7 +27,7 @@
 static struct plat_sci_port scif0_platform_data = {
 	.mapbase        = 0xFFE40000,
 	.flags          = UPF_BOOT_AUTOCONF,
-	.scscr          = SCSCR_RE | SCSCR_TE | SCSCR_REIE,
+	.scscr          = SCSCR_RE | SCSCR_TE | SCSCR_REIE | SCSCR_TOIE,
 	.scbrr_algo_id  = SCBRR_ALGO_2,
 	.type           = PORT_SCIF,
 	.irqs           = SCIx_IRQ_MUXED(evt2irq(0x8C0)),
@@ -45,7 +45,7 @@ static struct platform_device scif0_device = {
 static struct plat_sci_port scif1_platform_data = {
 	.mapbase        = 0xFFE41000,
 	.flags          = UPF_BOOT_AUTOCONF,
-	.scscr          = SCSCR_RE | SCSCR_TE | SCSCR_REIE,
+	.scscr          = SCSCR_RE | SCSCR_TE | SCSCR_REIE | SCSCR_TOIE,
 	.scbrr_algo_id	= SCBRR_ALGO_2,
 	.type           = PORT_SCIF,
 	.irqs           = SCIx_IRQ_MUXED(evt2irq(0x8E0)),
@@ -63,7 +63,7 @@ static struct platform_device scif1_device = {
 static struct plat_sci_port scif2_platform_data = {
 	.mapbase        = 0xFFE42000,
 	.flags          = UPF_BOOT_AUTOCONF,
-	.scscr          = SCSCR_RE | SCSCR_TE | SCSCR_REIE,
+	.scscr          = SCSCR_RE | SCSCR_TE | SCSCR_REIE | SCSCR_TOIE,
 	.scbrr_algo_id  = SCBRR_ALGO_2,
 	.type           = PORT_SCIF,
 	.irqs           = SCIx_IRQ_MUXED(evt2irq(0x900)),
@@ -99,7 +99,7 @@ static struct platform_device scif3_device = {
 static struct plat_sci_port scif4_platform_data = {
 	.mapbase        = 0xFFE44000,
 	.flags          = UPF_BOOT_AUTOCONF,
-	.scscr          = SCSCR_RE | SCSCR_TE | SCSCR_REIE,
+	.scscr          = SCSCR_RE | SCSCR_TE | SCSCR_REIE | SCSCR_TOIE,
 	.scbrr_algo_id	= SCBRR_ALGO_2,
 	.type           = PORT_SCIF,
 	.irqs           = SCIx_IRQ_MUXED(evt2irq(0x940)),
@@ -115,9 +115,9 @@ static struct platform_device scif4_device = {
 };
 
 static struct plat_sci_port scif5_platform_data = {
-	.mapbase        = 0xFFE43000,
+	.mapbase        = 0xFFE45000,
 	.flags          = UPF_BOOT_AUTOCONF,
-	.scscr          = SCSCR_RE | SCSCR_TE | SCSCR_REIE,
+	.scscr          = SCSCR_RE | SCSCR_TE | SCSCR_REIE | SCSCR_TOIE,
 	.scbrr_algo_id	= SCBRR_ALGO_2,
 	.type           = PORT_SCIF,
 	.irqs           = SCIx_IRQ_MUXED(evt2irq(0x960)),
@@ -438,7 +438,15 @@ static struct platform_device *sh7734_devices[] __initdata = {
 	&tmu7_device,
 	&tmu8_device,
 	&rtc_device,
+	&i2c0_device,
 };
+
+static int __init sh7734_devices_setup(void)
+{
+	return platform_add_devices(sh7734_devices,
+		ARRAY_SIZE(sh7734_devices));
+}
+arch_initcall(sh7734_devices_setup);
 
 static struct platform_device *sh7734_early_devices[] __initdata = {
 	&scif0_device,
@@ -464,7 +472,6 @@ void __init plat_early_device_setup(void)
 		ARRAY_SIZE(sh7734_early_devices));
 }
 
-#define GROUP 0
 enum {
 	UNUSED = 0,
 
@@ -495,6 +502,7 @@ enum {
 	RCAN0,
 	MIMLB,
 	SCIF0, SCIF1, SCIF2, SCIF3, SCIF4, SCIF5,
+	I2C1,
 	LBSCDMAC0, LBSCDMAC1, LBSCDMAC2,
 	RCAN1,
 	SDHI0, SDHI1,
@@ -538,6 +546,7 @@ enum {
 	LBSCDMAC_P,
 
 	/* Common */
+	I2C,
 	SDHI,
 	SSI,
 	SPI,
@@ -548,6 +557,7 @@ static struct intc_vect vectors[] __initdata = {
 	INTC_VECT(TMU00, 0x400),
 	INTC_VECT(TMU10, 0x420),
 	INTC_VECT(TMU20, 0x440),
+	INTC_VECT(TMU21, 0x460),
 	INTC_VECT(TMU30, 0x480),
 	INTC_VECT(TMU40, 0x4A0),
 	INTC_VECT(TMU50, 0x4C0),
@@ -571,12 +581,14 @@ static struct intc_vect vectors[] __initdata = {
 	INTC_VECT(LBSCATA, 0x840),
 	INTC_VECT(I2C0, 0x860),
 	INTC_VECT(RCAN0, 0x880),
-	INTC_VECT(SCIF0, 0x8A0),
-	INTC_VECT(SCIF1, 0x8C0),
+	INTC_VECT(MIMLB, 0x8A0),
+	INTC_VECT(SCIF0, 0x8C0),
+	INTC_VECT(SCIF1, 0x8E0),
 	INTC_VECT(SCIF2, 0x900),
 	INTC_VECT(SCIF3, 0x920),
 	INTC_VECT(SCIF4, 0x940),
 	INTC_VECT(SCIF5, 0x960),
+	INTC_VECT(I2C1, 0x9C0),
 	INTC_VECT(LBSCDMAC0, 0x9E0),
 	INTC_VECT(LBSCDMAC1, 0xA00),
 	INTC_VECT(LBSCDMAC2, 0xA20),
@@ -607,12 +619,13 @@ static struct intc_vect vectors[] __initdata = {
 	INTC_VECT(MTU2, 0xE20),
 	INTC_VECT(RSPI, 0xE40),
 	INTC_VECT(QSPI, 0xE60),
-	INTC_VECT(HSCIF, 0xFC0),
+	INTC_VECT(HSCIF, 0xEC0),
 	INTC_VECT(VEU3F_VE3, 0xF40),
 };
 
 static struct intc_group groups[] __initdata = {
 	/* Common */
+	INTC_GROUP(I2C, I2C0, I2C1),
 	INTC_GROUP(SDHI, SDHI0, SDHI1, SDHI2),
 	INTC_GROUP(SPI, HSPI, RSPI, QSPI),
 	INTC_GROUP(SSI, SSI0, SSI1, SSI2, SSI3),
@@ -635,6 +648,11 @@ static struct intc_group groups[] __initdata = {
 	INTC_GROUP(TMU_0_M, TMU00, TMU10, TMU20, TMU21), /* 1 */
 
 	/* Priority group*/
+	INTC_GROUP(TMU_2_P, TMU20, TMU21), /* INT2PRI0 */
+	INTC_GROUP(TMU_3_P, TMU30, TMU40, TMU50, TMU51), /* INT2PRI0 */
+	INTC_GROUP(TMU_6_P, TMU60, TMU70, TMU80), /* INT2PRI0 */
+	INTC_GROUP(SCIF_0_P, SCIF0, SCIF1, SCIF2), /* INT2PRI4 */
+	INTC_GROUP(SCIF_3_P, SCIF3, SCIF4, SCIF5), /* INT2PRI4 */
 	INTC_GROUP(RCAN_P, RCAN0, RCAN1), /* INT2PRI5 */
 	INTC_GROUP(LBSCDMAC_P, LBSCDMAC0, LBSCDMAC1), /* INT2PRI5 */
 };
@@ -669,7 +687,7 @@ static struct intc_mask_reg mask_registers[] __initdata = {
 		HUDI,
 		MMC,
 		RTC,
-		I2C0, /* I2C */ /* I2C 0, 1*/
+		I2C, /* I2C */ /* I2C 0, 1*/
 		TMU_3_M, /* TMU30 - TMU80 */
 		TMU_0_M, /* TMU00 - TMU21 */
 		DU } },
@@ -677,21 +695,21 @@ static struct intc_mask_reg mask_registers[] __initdata = {
 
 static struct intc_prio_reg prio_registers[] __initdata = {
 	{ 0xFF804000, 0, 32, 8, /* INT2PRI0 */
-		{ DU, TMU00, TMU10, TMU20 } },
+		{ DU, TMU00, TMU10, TMU_2_P } },
 	{ 0xFF804004, 0, 32, 8, /* INT2PRI1 */
-		{ TMU30, TMU60, RTC, SDHI } },
+		{ TMU_3_P, TMU_6_P, RTC, SDHI } },
 	{ 0xFF804008, 0, 32, 8, /* INT2PRI2 */
 		{ HUDI, SHDMAC, USB, SSI } },
 	{ 0xFF80400C, 0, 32, 8, /* INT2PRI3 */
 		{ VIN0, SPI, _2DG, LBSCATA } },
 	{ 0xFF804010, 0, 32, 8, /* INT2PRI4 */
-		{ SCIF0, SCIF3, HSCIF, LCDC } },
+		{ SCIF_0_P, SCIF_3_P, HSCIF, LCDC } },
 	{ 0xFF804014, 0, 32, 8, /* INT2PRI5 */
 		{ RCAN_P, LBSCDMAC_P, LBSCDMAC2, MMC } },
 	{ 0xFF804018, 0, 32, 8, /* INT2PRI6 */
 		{ HPBDMAC0_3, HPBDMAC4_10, HPBDMAC11_18, HPBDMAC19_22 } },
 	{ 0xFF80401C, 0, 32, 8, /* INT2PRI7 */
-		{ HPBDMAC23_25_27_28, I2C0, SRC0, SRC1 } },
+		{ HPBDMAC23_25_27_28, I2C, SRC0, SRC1 } },
 	{ 0xFF804020, 0, 32, 8, /* INT2PRI8 */
 		{ 0 /* ADIF */, VIN1, RESET_WDT, HIF } },
 	{ 0xFF804024, 0, 32, 8, /* INT2PRI9 */

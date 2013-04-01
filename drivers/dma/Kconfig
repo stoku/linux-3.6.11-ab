@@ -330,4 +330,13 @@ config DMATEST
 	  Simple DMA test client. Say N unless you're debugging a
 	  DMA Device driver.
 
+config SH7734_HPB_DMAE
+	tristate "Renesas SH7734 HPB DMAC support"
+	depends on (SUPERH && SH_DMA)
+	select DMA_ENGINE
+	help
+	  Enable support for the Renesas SH7734 series DMA controllers.
+	  This is supported to HPB-DMAC.
+
+	  Say Y here if you have enabled, otherwise say N.
 endif
