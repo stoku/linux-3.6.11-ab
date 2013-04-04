@@ -542,6 +542,11 @@ enum {
 	TMU_0_M,
 
 	/* Priority */
+	TMU_2_P,
+	TMU_3_P,
+	TMU_6_P,
+	SCIF_0_P,
+	SCIF_3_P,
 	RCAN_P,
 	LBSCDMAC_P,
 
