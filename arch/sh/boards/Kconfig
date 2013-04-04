@@ -359,6 +359,14 @@ config SH_APSH4AD0A
 	help
 	  Select AP-SH4AD-0A if configuring for an ALPHAPROJECT AP-SH4AD-0A.
 
+config SH_ACTLINUX_ALPHA
+	bool "ActLinux-Alpha"
+	depends on CPU_SUBTYPE_SH7734
+	select ARCH_REQUIRE_GPIOLIB
+	select REGULATOR_FIXED_VOLTAGE if REGULATOR
+	help
+	  Select if configuring for an ActBrain ActLinux-Alpha board.
+
 source "arch/sh/boards/mach-r2d/Kconfig"
 source "arch/sh/boards/mach-highlander/Kconfig"
 source "arch/sh/boards/mach-sdk7780/Kconfig"
