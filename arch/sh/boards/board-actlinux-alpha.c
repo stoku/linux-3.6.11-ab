@@ -15,9 +15,10 @@
 
 #include <linux/platform_device.h>
 #include <linux/io.h>
-#include <linux_platform_data/echi_sh.h>
+#include <linux/platform_data/ehci-sh.h>
 #include <linux/mtd/physmap.h>
 #include <linux/sh_eth.h>
+#include <linux/i2c.h>
 #include <cpu/sh7734.h>
 #include <asm/machvec.h>
 #include <asm/sizes.h>
@@ -46,7 +47,7 @@ static struct mtd_partition nor_flash_partitions[] = {
 		.name		= "kernel",
 		.offset		= MTDPART_OFS_APPEND,
 		.size		= SZ_8M,
-	}
+	},
 	{
 		.name		= "user",
 		.offset		= MTDPART_OFS_APPEND,
@@ -57,7 +58,7 @@ static struct mtd_partition nor_flash_partitions[] = {
 static struct physmap_flash_data nor_flash_data = {
 	.width		= 2,
 	.parts		= nor_flash_partitions,
-	.nr_pats	= ARRAY_SIZE(nor_flash_partitions),
+	.nr_parts	= ARRAY_SIZE(nor_flash_partitions),
 };
 
 static struct resource nor_flash_resources[] = {
@@ -108,7 +109,7 @@ static struct platform_device sh_eth_device = {
 	.name		= "sh-eth",
 	.id		= 0,
 	.dev = {
-		.platform_data	= &sh_eth_pdata;
+		.platform_data	= &sh_eth_pdata,
 	},
 	.num_resources	= ARRAY_SIZE(sh_eth_resources),
 	.resource	= sh_eth_resources,
@@ -214,25 +215,36 @@ static struct platform_device usb_ohci_device = {
 		.dma_mask		= &usb_ohci_dma_mask,
 		.coherent_dma_mask	= DMA_BIT_MASK(32),
 	},
-	.num_resources	= ARRAY_SIZE(usb_ohci_resouces),
+	.num_resources	= ARRAY_SIZE(usb_ohci_resources),
 	.resource	= usb_ohci_resources,
 };
 
 static struct platform_device *actlinux_alpha_devices[] __initdata = {
-	&nor_flash_device,
+	//&nor_flash_device,
 	&sh_eth_device,
 	&usb_ehci_device,
 	&usb_ohci_device,
 };
 
+/* I2C devices */
+static struct i2c_board_info actlinux_alpha_i2c_devices[] = {
+	/* RTC */
+	{
+		I2C_BOARD_INFO("rtc-rx8025", 0x32)
+	}
+};
+
 static int __init actlinux_alpha_arch_init(void)
 {
+	i2c_register_board_info(0, actlinux_alpha_i2c_devices,
+				ARRAY_SIZE(actlinux_alpha_i2c_devices));
+
 	return platform_add_devices(actlinux_alpha_devices,
 				ARRAY_SIZE(actlinux_alpha_devices));
 }
-arch_initcall(actlinux_arch_init);
+arch_initcall(actlinux_alpha_arch_init);
 
-static int __init actlinux_alpha_setup(char **cmdline_p)
+static void __init actlinux_alpha_setup(char **cmdline_p)
 {
 	pr_info("Act Brain Actlinux-Alpha support:\n");
 }
