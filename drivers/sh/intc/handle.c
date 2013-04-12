@@ -35,6 +35,29 @@ static intc_enum __init intc_grp_id(struct intc_desc *desc,
 	return 0;
 }
 
+#ifdef CONFIG_CPU_SUBTYPE_SH7734
+static intc_enum __init intc_grp_id_rev(struct intc_desc *desc,
+					intc_enum enum_id)
+{
+	struct intc_group *g = desc->hw.groups;
+	int i, j;
+
+	/* search backward */
+	for (i = desc->hw.nr_groups - 1; g && enum_id && i >= 0; i--) {
+		g = desc->hw.groups + i;
+
+		for (j = 0; g->enum_ids[j]; j++) {
+			if (g->enum_ids[j] != enum_id)
+				continue;
+
+			return g->enum_id;
+		}
+	}
+
+	return 0;
+}
+#endif /* CONFIG_CPU_SUBTYPE_SH7734 */
+
 static unsigned int __init _intc_mask_data(struct intc_desc *desc,
 					   struct intc_desc_int *d,
 					   intc_enum enum_id,
@@ -167,7 +190,11 @@ intc_get_prio_handle(struct intc_desc *desc, struct intc_desc_int *d,
 		return ret;
 
 	if (do_grps)
+#ifndef CONFIG_CPU_SUBTYPE_SH7734
 		return intc_get_prio_handle(desc, d, intc_grp_id(desc, enum_id), 0);
+#else
+		return intc_get_prio_handle(desc, d, intc_grp_id_rev(desc, enum_id), 0);
+#endif
 
 	return 0;
 }

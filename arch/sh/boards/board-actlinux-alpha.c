@@ -88,7 +88,7 @@ static struct resource sh_eth_resources[] = {
 	},
 	[1] = {
 		.start	= 0xFFE01800,
-		.end	= 0xFEE01FFF,
+		.end	= 0xFFE01FFF,
 		.flags	= IORESOURCE_MEM,
 	},
 	[2] = {
@@ -244,14 +244,20 @@ static int __init actlinux_alpha_arch_init(void)
 }
 arch_initcall(actlinux_alpha_arch_init);
 
-static void __init actlinux_alpha_setup(char **cmdline_p)
+static void __init actlinux_alpha_init_irq(void)
 {
-	pr_info("Act Brain Actlinux-Alpha support:\n");
+	int i;
+
+	printk("INT2MSKRG\t= 0x%08x\n", __raw_readl(0xFF804040));
+	for (i = 0; i <= 11; i++) {
+		printk("INT2PRI%d\t= 0x%08x\n", i,
+			__raw_readl(0xFF804000 + (4 * i)));
+	}
 }
 
 /* Machine Vector */
 static struct sh_machine_vector mv_actlinux_alpha __initmv = {
 	.mv_name	= "Actlinux-Alpha",
-	.mv_setup	= actlinux_alpha_setup,
+	.mv_init_irq	= actlinux_alpha_init_irq,
 };
 

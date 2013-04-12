@@ -19,7 +19,11 @@
 #include <cpu/gpio.h>
 #endif
 
+#ifdef CONFIG_CPU_SUBTYPE_SH7734
+#define ARCH_NR_GPIOS 779
+#else
 #define ARCH_NR_GPIOS 512
+#endif
 #include <linux/sh_pfc.h>
 
 #ifdef CONFIG_GPIOLIB
