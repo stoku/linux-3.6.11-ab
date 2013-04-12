@@ -366,7 +366,9 @@ static struct sh_eth_cpu_data sh_eth_my_cpu_data = {
 	.ecsr_value	= ECSR_ICD | ECSR_MPD,
 	.ecsipr_value	= ECSIPR_LCHNGIP | ECSIPR_ICDIP | ECSIPR_MPDIP,
 	.eesipr_value	= DMAC_M_RFRMER | DMAC_M_ECI | 0x003fffff,
-
+#if defined(CONFIG_CPU_SUBTYPE_SH7734)
+	.rmcr_value	= 0x00000001,
+#endif
 	.tx_check	= EESR_TC1 | EESR_FTC,
 	.eesr_err_check	= EESR_TWB1 | EESR_TWB | EESR_TABT | EESR_RABT | \
 			  EESR_RDE | EESR_RFRMER | EESR_TFE | EESR_TDE | \
@@ -591,7 +593,7 @@ static int sh_eth_check_reset(struct net_device *ndev)
 		mdelay(1);
 		cnt--;
 	}
-	if (cnt < 0) {
+	if (cnt <= 0) {
 		printk(KERN_ERR "Device reset fail\n");
 		ret = -ETIMEDOUT;
 	}

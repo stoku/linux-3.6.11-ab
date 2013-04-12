@@ -101,17 +101,16 @@ static void __init intc_register_irq(struct intc_desc *desc,
 	data[0] = intc_get_mask_handle(desc, d, enum_id, 0);
 	data[1] = intc_get_prio_handle(desc, d, enum_id, 0);
 
-#ifndef CONFIG_CPU_SUBTYPE_SH7734
 	primary = 0;
-#else
-	primary = 1; /* priority is primary for SH7734 */
-#endif
-	if (!data[primary] && data[primary ^ 1])
-		primary ^= 1;
 
-	if (!data[0] && !data[1])
+	if (!data[0] && data[1])
+		primary = 1;
+
+	if (!data[0] && !data[1]) {
+		primary = 1;
 		pr_warning("missing unique irq mask for irq %d (vect 0x%04x)\n",
 			   irq, irq2evt(irq));
+	}
 
 	data[0] = data[0] ? data[0] : intc_get_mask_handle(desc, d, enum_id, 1);
 	data[1] = data[1] ? data[1] : intc_get_prio_handle(desc, d, enum_id, 1);

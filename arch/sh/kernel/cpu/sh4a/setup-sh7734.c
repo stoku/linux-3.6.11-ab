@@ -464,6 +464,7 @@ static struct platform_device *sh7734_early_devices[] __initdata = {
 	&tmu6_device,
 	&tmu7_device,
 	&tmu8_device,
+	&i2c0_device,
 };
 
 void __init plat_early_device_setup(void)
@@ -629,12 +630,6 @@ static struct intc_vect vectors[] __initdata = {
 };
 
 static struct intc_group groups[] __initdata = {
-	/* Common */
-	INTC_GROUP(I2C, I2C0, I2C1),
-	INTC_GROUP(SDHI, SDHI0, SDHI1, SDHI2),
-	INTC_GROUP(SPI, HSPI, RSPI, QSPI),
-	INTC_GROUP(SSI, SSI0, SSI1, SSI2, SSI3),
-
 	/* Mask group */
 	INTC_GROUP(STIF_M, STIF0, STIF1), /* 22 */
 	INTC_GROUP(GPIO_M, GPIO0_3, GPIO4_5), /* 21 */
@@ -651,6 +646,12 @@ static struct intc_group groups[] __initdata = {
 	INTC_GROUP(TMU_3_M, TMU30, TMU40, TMU50, TMU51,
 			TMU60, TMU60, TMU70, TMU80), /* 2 */
 	INTC_GROUP(TMU_0_M, TMU00, TMU10, TMU20, TMU21), /* 1 */
+
+	/* Common */
+	INTC_GROUP(I2C, I2C0, I2C1),
+	INTC_GROUP(SDHI, SDHI0, SDHI1, SDHI2),
+	INTC_GROUP(SPI, HSPI, RSPI, QSPI),
+	INTC_GROUP(SSI, SSI0, SSI1, SSI2, SSI3),
 
 	/* Priority group*/
 	INTC_GROUP(TMU_2_P, TMU20, TMU21), /* INT2PRI0 */
@@ -716,7 +717,7 @@ static struct intc_prio_reg prio_registers[] __initdata = {
 	{ 0xFF80401C, 0, 32, 8, /* INT2PRI7 */
 		{ HPBDMAC23_25_27_28, I2C, SRC0, SRC1 } },
 	{ 0xFF804020, 0, 32, 8, /* INT2PRI8 */
-		{ 0 /* ADIF */, VIN1, RESET_WDT, HIF } },
+		{ ADC, VIN1, RESET_WDT, HIF } },
 	{ 0xFF804024, 0, 32, 8, /* INT2PRI9 */
 		{ ADMAC, FLCTL, GPIO0_3, GPIO4_5 } },
 	{ 0xFF804028, 0, 32, 8, /* INT2PRI10 */

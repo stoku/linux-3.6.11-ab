@@ -82,13 +82,13 @@ static struct platform_device nor_flash_device = {
 
 static struct resource sh_eth_resources[] = {
 	[0] = {
-		.start	= 0xFFE00000,
-		.end	= 0xFFE007FF,
+		.start	= 0xFEE00000,
+		.end	= 0xFEE007FF,
 		.flags	= IORESOURCE_MEM,
 	},
 	[1] = {
-		.start	= 0xFFE01800,
-		.end	= 0xFFE01FFF,
+		.start	= 0xFEE01800,
+		.end	= 0xFEE01FFF,
 		.flags	= IORESOURCE_MEM,
 	},
 	[2] = {
@@ -234,8 +234,42 @@ static struct i2c_board_info actlinux_alpha_i2c_devices[] = {
 	}
 };
 
+extern const char * envp_init[];
+
+static void __init set_mac_address(void)
+{
+	int i;
+	const char *address = NULL;
+	unsigned char mac[6];
+
+	for (i = 0; !address && envp_init[i]; i++)
+		if (!strncmp("eth=", envp_init[i], 4))
+			address = envp_init[i] + 4;
+
+	if (!address)	return;
+
+	if (strlen(address) != 17)
+		goto invalid;
+
+	for (i = 2; i < 17; i += 3)
+		if (address[i] != ':')
+			goto invalid;
+
+	for (i = 0; i < 6; i++)
+		if (hex2bin(mac + i, address + (3 * i), 1))
+			goto invalid;
+
+	memcpy(sh_eth_pdata.mac_addr, mac, sizeof(mac));
+	return;
+invalid:
+	pr_err("Invalid MAC address: %s\n", address);
+	return;
+}
+
 static int __init actlinux_alpha_arch_init(void)
 {
+	set_mac_address();
+
 	i2c_register_board_info(0, actlinux_alpha_i2c_devices,
 				ARRAY_SIZE(actlinux_alpha_i2c_devices));
 
@@ -248,9 +282,10 @@ static void __init actlinux_alpha_init_irq(void)
 {
 	int i;
 
-	printk("INT2MSKRG\t= 0x%08x\n", __raw_readl(0xFF804040));
+	pr_info("INTC2 status:\n");
+	pr_info("\tINT2MSKRG\t= 0x%08x\n", __raw_readl(0xFF804040));
 	for (i = 0; i <= 11; i++) {
-		printk("INT2PRI%d\t= 0x%08x\n", i,
+		pr_info("\tINT2PRI%d\t= 0x%08x\n", i,
 			__raw_readl(0xFF804000 + (4 * i)));
 	}
 }
