@@ -227,10 +227,10 @@ static struct platform_device *actlinux_alpha_devices[] __initdata = {
 };
 
 /* I2C devices */
-static struct i2c_board_info actlinux_alpha_i2c_devices[] = {
+static struct i2c_board_info actlinux_alpha_i2c_devices[] __initdata = {
 	/* RTC */
 	{
-		I2C_BOARD_INFO("rtc-rx8025", 0x32)
+		I2C_BOARD_INFO("rx8025", 0x32)
 	}
 };
 
