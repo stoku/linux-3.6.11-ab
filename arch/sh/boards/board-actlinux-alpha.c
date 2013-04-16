@@ -25,40 +25,8 @@
 
 /* NOR Flash */
 
-static struct mtd_partition nor_flash_partitions[] = {
-	{
-		.name		= "boot loader",
-		.offset		= 0x00000000,
-		.size		= SZ_256K,
-		.mask_flags	= MTD_WRITEABLE, /* read-only */
-	},
-	{
-		.name		= "boot env",
-		.offset		= MTDPART_OFS_APPEND,
-		.size		= SZ_256K,
-		.mask_flags	= MTD_WRITEABLE, /* read-only */
-	},
-	{
-		.name		= "splash image",
-		.offset		= MTDPART_OFS_APPEND,
-		.size		= SZ_1M + SZ_512K,
-	},
-	{
-		.name		= "kernel",
-		.offset		= MTDPART_OFS_APPEND,
-		.size		= SZ_8M,
-	},
-	{
-		.name		= "user",
-		.offset		= MTDPART_OFS_APPEND,
-		.size		= MTDPART_SIZ_FULL,
-	},
-};
-
 static struct physmap_flash_data nor_flash_data = {
 	.width		= 2,
-	.parts		= nor_flash_partitions,
-	.nr_parts	= ARRAY_SIZE(nor_flash_partitions),
 };
 
 static struct resource nor_flash_resources[] = {
@@ -220,7 +188,7 @@ static struct platform_device usb_ohci_device = {
 };
 
 static struct platform_device *actlinux_alpha_devices[] __initdata = {
-	//&nor_flash_device,
+	&nor_flash_device,
 	&sh_eth_device,
 	&usb_ehci_device,
 	&usb_ohci_device,
@@ -234,42 +202,8 @@ static struct i2c_board_info actlinux_alpha_i2c_devices[] __initdata = {
 	}
 };
 
-extern const char * envp_init[];
-
-static void __init set_mac_address(void)
-{
-	int i;
-	const char *address = NULL;
-	unsigned char mac[6];
-
-	for (i = 0; !address && envp_init[i]; i++)
-		if (!strncmp("eth=", envp_init[i], 4))
-			address = envp_init[i] + 4;
-
-	if (!address)	return;
-
-	if (strlen(address) != 17)
-		goto invalid;
-
-	for (i = 2; i < 17; i += 3)
-		if (address[i] != ':')
-			goto invalid;
-
-	for (i = 0; i < 6; i++)
-		if (hex2bin(mac + i, address + (3 * i), 1))
-			goto invalid;
-
-	memcpy(sh_eth_pdata.mac_addr, mac, sizeof(mac));
-	return;
-invalid:
-	pr_err("Invalid MAC address: %s\n", address);
-	return;
-}
-
 static int __init actlinux_alpha_arch_init(void)
 {
-	set_mac_address();
-
 	i2c_register_board_info(0, actlinux_alpha_i2c_devices,
 				ARRAY_SIZE(actlinux_alpha_i2c_devices));
 
