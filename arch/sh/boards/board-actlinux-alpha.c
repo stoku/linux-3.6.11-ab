@@ -19,7 +19,9 @@
 #include <linux/mtd/physmap.h>
 #include <linux/sh_eth.h>
 #include <linux/i2c.h>
+#include <linux/sh7734-hpbdma.h>
 #include <cpu/sh7734.h>
+#include <cpu/dma-register.h>
 #include <asm/machvec.h>
 #include <asm/sizes.h>
 
@@ -187,11 +189,108 @@ static struct platform_device usb_ohci_device = {
 	.resource	= usb_ohci_resources,
 };
 
+/* HPB-DMAC */
+static const struct hpb_dmae_slave_config hpb_dmae_slaves[] = {
+	[0] = {
+		.id	= SHDMA_SLAVE_SDHI1_TX,
+		.addr	= 0xFFE4D030,
+		.dcr	= SPDS_32BIT | DMDL | DPDS_32BIT,
+		.port	= 0x1312,
+		.dma_ch	= 23,
+	},
+	[1] = {
+		.id	= SHDMA_SLAVE_SDHI1_RX,
+		.addr	= 0xFFE4D030,
+		.dcr	= SMDL | SPDS_32BIT | DPDS_32BIT,
+		.port	= 0x1312,
+		.dma_ch	= 23,
+	},
+	[2] = {
+		.id	= SHDMA_SLAVE_SDHI2_TX,
+		.addr	= 0xFFE4E030,
+		.dcr	= SPDS_32BIT | DMDL | DPDS_32BIT,
+		.port	= 0x1514,
+		.dma_ch	= 24,
+	},
+	[3] = {
+		.id	= SHDMA_SLAVE_SDHI2_RX,
+		.addr	= 0xFFE4E030,
+		.dcr	= SMDL | SPDS_32BIT | DPDS_32BIT,
+		.port	= 0x1514,
+		.dma_ch	= 24,
+	},
+};
+
+static const struct hpb_dmae_channel hpb_dmae_channels[] = {
+	[0] = {
+		.offset	= 0x40 * 23,
+		.ch_irq	= evt2irq(0xBE0),
+		.s_id	= SHDMA_SLAVE_SDHI1_TX,
+	},
+	[1] = {
+		.offset = 0x40 * 23,
+		.ch_irq	= evt2irq(0xBE0),
+		.s_id	= SHDMA_SLAVE_SDHI1_RX,
+	},
+	[2] = {
+		.offset = 0x40 * 24,
+		.ch_irq	= evt2irq(0xBE0),
+		.s_id	= SHDMA_SLAVE_SDHI2_TX,
+	},
+	[3] = {
+		.offset = 0x40 * 24,
+		.ch_irq	= evt2irq(0xBE0),
+		.s_id	= SHDMA_SLAVE_SDHI2_RX,
+	},
+};
+
+static const unsigned int ts_shift[] = TS_SHIFT;
+
+static struct hpb_dmae_pdata hpb_dmae_platform_data = {
+	.slave		= hpb_dmae_slaves,
+	.slave_num	= ARRAY_SIZE(hpb_dmae_slaves),
+	.channel	= hpb_dmae_channels,
+	.channel_num	= ARRAY_SIZE(hpb_dmae_channels),
+	.ts_shift	= ts_shift,
+	.ts_shift_num	= ARRAY_SIZE(ts_shift),
+};
+
+static struct resource hpb_dmae_resources[] = {
+	[0] = {
+		/* channel registers */
+		.start	= 0xFFC08000,
+		.end	= 0xFFC08000 + (0x40 * HPB_DMA_MAXCH) - 1,
+		.flags	= IORESOURCE_MEM,
+	},
+	[1] = {
+		/* common registers */
+		.start 	= 0xFFC08800,
+		.end	= 0xFFC088A4 - 1,
+		.flags	= IORESOURCE_MEM,
+	},
+	[2] = {
+		.start	= evt2irq(0xB60),
+		.end	= evt2irq(0xBE0),
+		.flags	= IORESOURCE_IRQ,
+	},
+};
+
+static struct platform_device hpb_dmae_device = {
+	.name		= "hpb-dma-engine",
+	.id		= -1,
+	.resource	= hpb_dmae_resources,
+	.num_resources	= ARRAY_SIZE(hpb_dmae_resources),
+	.dev = {
+		.platform_data	= &hpb_dmae_platform_data,
+	},
+};
+
 static struct platform_device *actlinux_alpha_devices[] __initdata = {
 	&nor_flash_device,
 	&sh_eth_device,
 	&usb_ehci_device,
 	&usb_ohci_device,
+	&hpb_dmae_device,
 };
 
 /* I2C devices */
