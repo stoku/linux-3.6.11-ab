@@ -285,12 +285,54 @@ static struct platform_device hpb_dmae_device = {
 	},
 };
 
+/* DU */
+static struct resource sh_du_resources[] = {
+	[0] = {
+		.start	= 0xFFF80000,
+		.end	= 0xFFF9304C - 1,
+		.flags	= IORESOURCE_MEM,
+	},
+	[1] = {
+		.start	= evt2irq(0x3E0),
+		.flags	= IORESOURCE_IRQ,
+	},
+};
+
+static struct platform_device sh_du_device = {
+	.name		= "sh_du",
+	.id		= -1,
+	.resource	= sh_du_resources,
+	.num_resources	= ARRAY_SIZE(sh_du_resources),
+};
+
+/* 2DG */
+static struct resource sh_2dg_resources[] = {
+	[0] = {
+		.start	= 0xFFE80000,
+		.end	= 0xFFE800FC - 1,
+		.flags	= IORESOURCE_MEM,
+	},
+	[1] = {
+		.start	= evt2irq(0x780),
+		.flags	= IORESOURCE_IRQ,
+	},
+};
+
+static struct platform_device sh_2dg_device = {
+	.name		= "sh_2dg",
+	.id		= -1,
+	.resource	= sh_2dg_resources,
+	.num_resources	= ARRAY_SIZE(sh_2dg_resources),
+};
+
 static struct platform_device *actlinux_alpha_devices[] __initdata = {
 	&nor_flash_device,
 	&sh_eth_device,
 	&usb_ehci_device,
 	&usb_ohci_device,
 	&hpb_dmae_device,
+	&sh_du_device,
+	&sh_2dg_device,
 };
 
 /* I2C devices */
