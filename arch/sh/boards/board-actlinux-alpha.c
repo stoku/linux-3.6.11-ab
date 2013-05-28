@@ -19,6 +19,8 @@
 #include <linux/mtd/physmap.h>
 #include <linux/sh_eth.h>
 #include <linux/i2c.h>
+#include <linux/clk.h>
+#include <linux/sh_clk.h>
 #include <linux/sh7734-hpbdma.h>
 #include <cpu/sh7734.h>
 #include <cpu/dma-register.h>
@@ -353,21 +355,20 @@ static int __init actlinux_alpha_arch_init(void)
 }
 arch_initcall(actlinux_alpha_arch_init);
 
-static void __init actlinux_alpha_init_irq(void)
+static int __init actlinux_alpha_clk_init(void)
 {
-	int i;
+	struct clk *clk = clk_get(NULL, "view"); /* DU */
 
-	pr_info("INTC2 status:\n");
-	pr_info("\tINT2MSKRG\t= 0x%08x\n", __raw_readl(0xFF804040));
-	for (i = 0; i <= 11; i++) {
-		pr_info("\tINT2PRI%d\t= 0x%08x\n", i,
-			__raw_readl(0xFF804000 + (4 * i)));
-	}
+	if (clk && ((ioread32(clk->mapped_reg) & (1 << clk->enable_bit)) == 0))
+		/* enabled by U-boot -> don't disable on init */
+		clk->flags |= CLK_ENABLE_ON_INIT;
+
+	return 0;
 }
 
 /* Machine Vector */
 static struct sh_machine_vector mv_actlinux_alpha __initmv = {
 	.mv_name	= "Actlinux-Alpha",
-	.mv_init_irq	= actlinux_alpha_init_irq,
+	.mv_clk_init	= actlinux_alpha_clk_init,
 };
 
