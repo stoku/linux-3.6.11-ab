@@ -69,6 +69,11 @@ static bool hwcalib_xy;
 module_param(hwcalib_xy, bool, 0644);
 MODULE_PARM_DESC(hwcalib_xy, "If set hw-calibrated X/Y are used if available");
 
+static int matrix[6];
+static int nr_matrix;
+module_param_array(matrix, int, &nr_matrix, 0644);
+MODULE_PARM_DESC(matrix, "Transformation matrix for device coordinate");
+
 /* device specifc data/functions */
 struct usbtouch_usb;
 struct usbtouch_device_info {
@@ -1290,6 +1295,16 @@ static struct usbtouch_device_info usbtouch_dev_info[] = {
 /*****************************************************************************
  * Generic Part
  */
+static void usbtouch_xform(struct usbtouch_usb *usbtouch)
+{
+	int x, y;
+
+	x = usbtouch->x;
+	y = usbtouch->y;
+	usbtouch->x = ((matrix[0] * x) + (matrix[1] * y) + matrix[2]) >> 8;
+	usbtouch->y = ((matrix[3] * x) + (matrix[4] * y) + matrix[5]) >> 8;
+}
+
 static void usbtouch_process_pkt(struct usbtouch_usb *usbtouch,
                                  unsigned char *pkt, int len)
 {
@@ -1298,17 +1313,22 @@ static void usbtouch_process_pkt(struct usbtouch_usb *usbtouch,
 	if (!type->read_data(usbtouch, pkt))
 			return;
 
-	input_report_key(usbtouch->input, BTN_TOUCH, usbtouch->touch);
-
 	if (swap_xy) {
-		input_report_abs(usbtouch->input, ABS_X, usbtouch->y);
-		input_report_abs(usbtouch->input, ABS_Y, usbtouch->x);
-	} else {
-		input_report_abs(usbtouch->input, ABS_X, usbtouch->x);
-		input_report_abs(usbtouch->input, ABS_Y, usbtouch->y);
+		int tmp     = usbtouch->x;
+		usbtouch->x = usbtouch->y;
+		usbtouch->y = tmp;
 	}
+	if (nr_matrix == 6) {
+		usbtouch_xform(usbtouch);
+	}
+
+	input_report_abs(usbtouch->input, ABS_X, usbtouch->x);
+	input_report_abs(usbtouch->input, ABS_Y, usbtouch->y);
+
 	if (type->max_press)
 		input_report_abs(usbtouch->input, ABS_PRESSURE, usbtouch->press);
+
+	input_report_key(usbtouch->input, BTN_TOUCH, usbtouch->touch);
 	input_sync(usbtouch->input);
 }
 
