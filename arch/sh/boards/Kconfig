@@ -367,6 +367,14 @@ config SH_ACTLINUX_ALPHA
 	help
 	  Select if configuring for an ActBrain ActLinux-Alpha board.
 
+config SH_ACTLINUX_BETA
+	bool "ActLinux-Beta"
+	depends on CPU_SUBTYPE_SH7724
+	select ARCH_REQUIRE_GPIOLIB
+	select REGULATOR_FIXED_VOLTAGE if REGULATOR
+	help
+	  Select if configuring for an ActBrain Actlinux-Beta board.
+
 source "arch/sh/boards/mach-r2d/Kconfig"
 source "arch/sh/boards/mach-highlander/Kconfig"
 source "arch/sh/boards/mach-sdk7780/Kconfig"

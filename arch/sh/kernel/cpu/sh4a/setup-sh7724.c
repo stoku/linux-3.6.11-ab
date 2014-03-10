@@ -573,7 +573,7 @@ static struct resource beu0_resources[] = {
 	[0] = {
 		.name	= "BEU0",
 		.start	= 0xfe930000,
-		.end	= 0xfe933400,
+		.end	= 0xfe9333ff,
 		.flags	= IORESOURCE_MEM,
 	},
 	[1] = {
@@ -601,8 +601,8 @@ static struct uio_info beu1_platform_data = {
 static struct resource beu1_resources[] = {
 	[0] = {
 		.name	= "BEU1",
-		.start	= 0xfe940000,
-		.end	= 0xfe943400,
+		.start	= 0xfe934000,
+		.end	= 0xfe9373ff,
 		.flags	= IORESOURCE_MEM,
 	},
 	[1] = {

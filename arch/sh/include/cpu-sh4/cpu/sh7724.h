@@ -314,5 +314,6 @@ enum {
 extern struct clk sh7724_fsimcka_clk;
 extern struct clk sh7724_fsimckb_clk;
 extern struct clk sh7724_dv_clki;
+extern struct clk sh7724_lcdl_clk;
 
 #endif /* __ASM_SH7724_H__ */

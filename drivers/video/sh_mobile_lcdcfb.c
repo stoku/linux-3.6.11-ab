@@ -365,8 +365,9 @@ static void sh_mobile_lcdc_clk_off(struct sh_mobile_lcdc_priv *priv)
 static int sh_mobile_lcdc_setup_clocks(struct sh_mobile_lcdc_priv *priv,
 				       int clock_source)
 {
-	struct clk *clk;
+	struct clk *clk, *parent;
 	char *str;
+	int ret;
 
 	switch (clock_source) {
 	case LCDC_CLK_BUS:
@@ -378,24 +379,31 @@ static int sh_mobile_lcdc_setup_clocks(struct sh_mobile_lcdc_priv *priv,
 		priv->lddckr = LDDCKR_ICKSEL_MIPI;
 		break;
 	case LCDC_CLK_EXTERNAL:
-		str = NULL;
+		str = "lcdl_clk";
 		priv->lddckr = LDDCKR_ICKSEL_HDMI;
 		break;
 	default:
 		return -EINVAL;
 	}
 
-	if (str == NULL)
-		return 0;
-
-	clk = clk_get(priv->dev, str);
+	clk = clk_get(priv->dev, NULL);
 	if (IS_ERR(clk)) {
-		dev_err(priv->dev, "cannot get dot clock %s\n", str);
+		dev_err(priv->dev, "cannot get dot clock\n");
 		return PTR_ERR(clk);
 	}
 
+	parent = clk_get_sys(NULL, str);
+	if (IS_ERR(parent) || !clk_get_rate(parent)) {
+		dev_warn(priv->dev, "invalid input clock (%s)\n", str);
+		return -ENODEV;
+	}
+
+	clk_disable(clk); // clk may be enabled on init
+	ret = clk_set_parent(clk, parent);
+	clk_put(parent);
+
 	priv->dot_clk = clk;
-	return 0;
+	return ret;
 }
 
 /* -----------------------------------------------------------------------------
@@ -960,8 +968,9 @@ static void sh_mobile_lcdc_overlay_setup(struct sh_mobile_lcdc_overlay *ovl)
 static void __sh_mobile_lcdc_start(struct sh_mobile_lcdc_priv *priv)
 {
 	struct sh_mobile_lcdc_chan *ch;
-	unsigned long tmp;
-	int k, m;
+	unsigned long tmp, val;
+	unsigned long long pat;
+	int k;
 
 	/* Enable LCDC channels. Read data from external memory, avoid using the
 	 * BEU for now.
@@ -982,19 +991,38 @@ static void __sh_mobile_lcdc_start(struct sh_mobile_lcdc_priv *priv)
 		/* Power supply */
 		lcdc_write_chan(ch, LDPMR, 0);
 
-		m = ch->cfg->clock_divider;
-		if (!m)
-			continue;
+		val = clk_get_rate(priv->dot_clk);
+		val = ch->display.mode.pixclock * (val / 10000);
+		val = (val + 50000000) / 100000000;
 
-		/* FIXME: sh7724 can only use 42, 48, 54 and 60 for the divider
-		 * denominator.
-		 */
-		lcdc_write_chan(ch, LDDCKPAT1R, 0);
-		lcdc_write_chan(ch, LDDCKPAT2R, (1 << (m/2)) - 1);
+		if (val <= 1) {
+			val = LDDCKR_MOSEL;
+			pat = 0ull;
+		} else {
+			unsigned long denom, remain, d, r;
 
-		if (m == 1)
-			m = LDDCKR_MOSEL;
-		tmp |= m << (lcdc_chan_is_sublcd(ch) ? 8 : 0);
+			denom = 0;
+			remain = val;
+			for (d = 42u; d <= 60u; d += 6) {
+				r = denom % val;
+				if (r < remain) {
+					denom = d;
+					remain = r;
+					if (r == 0u) break;
+				}
+			}
+			pat = (1ull << (val >> 1)) - 1ull;
+			while (val < denom) {
+				pat |= pat << val;
+				val <<= 1;
+			}
+			pat &= (1ull << denom) - 1ull;
+			val = denom;
+		}
+		
+		lcdc_write_chan(ch, LDDCKPAT2R, (u32)pat);
+		lcdc_write_chan(ch, LDDCKPAT1R, (u32)(pat >> 32));
+		tmp |= val << (lcdc_chan_is_sublcd(ch) ? 8 : 0);
 	}
 
 	lcdc_write(priv, _LDDCKR, tmp);

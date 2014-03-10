@@ -114,7 +114,7 @@ static struct clk div3_clk = {
 	.parent		= &pll_clk,
 };
 
-/* External input clock (pin name: FSIMCKA/FSIMCKB/DV_CLKI ) */
+/* External input clock (pin name: FSIMCKA/FSIMCKB/DV_CLKI/LCDLCLK ) */
 struct clk sh7724_fsimcka_clk = {
 };
 
@@ -122,6 +122,9 @@ struct clk sh7724_fsimckb_clk = {
 };
 
 struct clk sh7724_dv_clki = {
+};
+
+struct clk sh7724_lcdl_clk = {
 };
 
 static struct clk *main_clks[] = {
@@ -133,6 +136,7 @@ static struct clk *main_clks[] = {
 	&sh7724_fsimcka_clk,
 	&sh7724_fsimckb_clk,
 	&sh7724_dv_clki,
+	&sh7724_lcdl_clk,
 };
 
 static void div4_kick(struct clk *clk)
@@ -275,6 +279,7 @@ static struct clk_lookup lookups[] = {
 	CLKDEV_CON_ID("fll_clk", &fll_clk),
 	CLKDEV_CON_ID("pll_clk", &pll_clk),
 	CLKDEV_CON_ID("div3_clk", &div3_clk),
+	CLKDEV_CON_ID("lcdl_clk", &sh7724_lcdl_clk),
 
 	/* DIV4 clocks */
 	CLKDEV_CON_ID("cpu_clk", &div4_clks[DIV4_I]),
@@ -336,6 +341,8 @@ static struct clk_lookup lookups[] = {
 	CLKDEV_CON_ID("tsif0", &mstp_clks[HWBLK_TSIF]),
 	CLKDEV_DEV_ID("renesas_usbhs.1", &mstp_clks[HWBLK_USB1]),
 	CLKDEV_DEV_ID("renesas_usbhs.0", &mstp_clks[HWBLK_USB0]),
+	CLKDEV_CON_ID("usb1", &mstp_clks[HWBLK_USB1]),
+	CLKDEV_CON_ID("usb0", &mstp_clks[HWBLK_USB0]),
 	CLKDEV_CON_ID("2dg0", &mstp_clks[HWBLK_2DG]),
 	CLKDEV_DEV_ID("sh_mobile_sdhi.0", &mstp_clks[HWBLK_SDHI0]),
 	CLKDEV_DEV_ID("sh_mobile_sdhi.1", &mstp_clks[HWBLK_SDHI1]),
