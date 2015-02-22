@@ -68,7 +68,7 @@ static struct ax_plat_data ax88796_platdata = {
 static struct resource ax88796_resources[] = {
 	[0] = {
 		.start	= 0x19000000,
-		.end	= 0x19000020 - 1,
+		.end	= 0x19000040 - 1,
 		.flags	= IORESOURCE_MEM,
 	},
 	[1] = {
@@ -91,7 +91,7 @@ static struct platform_device ax88796_device = {
 
 static void usb0_port_power(int port, int power)
 {
-	gpio_set_value(GPIO_PTX1, power ? 0 : 1);
+	gpio_set_value(GPIO_PTX2, power ? 1 : 0);
 }
 
 static struct r8a66597_platdata usb0_host_data = {
@@ -128,7 +128,7 @@ static struct platform_device usb0_host_device = {
 
 static void usb1_port_power(int port, int power)
 {
-	gpio_set_value(GPIO_PTX7, power ? 0 : 1);
+	gpio_set_value(GPIO_PTX3, power ? 1 : 0);
 }
 
 static struct r8a66597_platdata usb1_host_data = {
@@ -377,8 +377,8 @@ static int __init actlinux_beta_arch_init(void)
 	/* enable USB */
 	__raw_writew(0x0000, 0xA4D80000);
 	__raw_writew(0x0000, 0xA4D90000);
-	gpio_request_one(GPIO_PTX1, GPIOF_OUT_INIT_HIGH, NULL);
-	gpio_request_one(GPIO_PTX7, GPIOF_OUT_INIT_HIGH, NULL);
+	gpio_request_one(GPIO_PTX2, GPIOF_OUT_INIT_LOW, NULL);
+	gpio_request_one(GPIO_PTX3, GPIOF_OUT_INIT_LOW, NULL);
 	__raw_writew(0x0600, 0xa40501d4);
 	__raw_writew(0x0600, 0xa4050192);
 
