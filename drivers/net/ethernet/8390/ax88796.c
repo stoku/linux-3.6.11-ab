@@ -48,7 +48,10 @@
 #define ax_convert_addr(_a) ((void __force __iomem *)(_a))
 
 #define ei_inb(_a) readb(ax_convert_addr(_a))
-#define ei_outb(_v, _a) writeb(_v, ax_convert_addr(_a))
+
+// WARNING: this makes the driver not working on other than ActLinux board.
+//#define ei_outb(_v, _a) writeb(_v, ax_convert_addr(_a))
+#define ei_outb(_v, _a) writew(_v, ax_convert_addr(_a))
 
 #define ei_inb_p(_a) ei_inb(_a)
 #define ei_outb_p(_v, _a) ei_outb(_v, _a)
