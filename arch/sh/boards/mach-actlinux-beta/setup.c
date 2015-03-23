@@ -42,7 +42,7 @@ static struct physmap_flash_data nor_flash_data = {
 static struct resource nor_flash_resources[] = {
 	[0] = {
 		.start	= 0x00000000,
-		.end	= 0x00000000 + SZ_32M - 1,
+		.end	= 0x00000000 + SZ_64M - 1,
 		.flags	= IORESOURCE_MEM,
 	}
 };
