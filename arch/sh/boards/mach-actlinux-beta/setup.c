@@ -26,6 +26,7 @@
 #include <linux/usb/renesas_usbhs.h>
 #include <linux/mmc/host.h>
 #include <linux/mmc/sh_mobile_sdhi.h>
+#include <linux/mfd/tmio.h>
 #include <net/ax88796.h>
 #include <video/sh_mobile_lcdc.h>
 #include <asm/machvec.h>
@@ -235,6 +236,7 @@ static struct sh_mobile_sdhi_info sdhi0_info = {
 	.dma_slave_tx	= SHDMA_SLAVE_SDHI0_TX,
 	.dma_slave_rx	= SHDMA_SLAVE_SDHI0_RX,
 	.tmio_caps      = MMC_CAP_SDIO_IRQ,
+	.tmio_flags	= TMIO_MMC_WRPROTECT_DISABLE,
 };
 
 static struct resource sdhi0_resources[] = {
@@ -262,16 +264,11 @@ static struct platform_device sdhi0_device = {
 
 /* SDHI1 */
 
-static void sdhi1_set_pwr(struct platform_device *pdev, int state)
-{
-	gpio_set_value(GPIO_PTM0, state);
-};
-
 static struct sh_mobile_sdhi_info sdhi1_info = {
 	.dma_slave_tx	= SHDMA_SLAVE_SDHI1_TX,
 	.dma_slave_rx	= SHDMA_SLAVE_SDHI1_RX,
-	.tmio_caps      = MMC_CAP_SDIO_IRQ | MMC_CAP_POWER_OFF_CARD,
-	.set_pwr	= sdhi1_set_pwr,
+	.tmio_caps	= MMC_CAP_SDIO_IRQ,
+	.tmio_flags	= TMIO_MMC_WRPROTECT_DISABLE,
 };
 
 static struct resource sdhi1_resources[] = {
@@ -354,7 +351,7 @@ static int __init actlinux_beta_arch_init(void)
 	gpio_request(GPIO_FN_PDSTATUS, NULL);
 
 	/* enable SCIF */
-	//gpio_request(GPIO_FN_SCIF0_SCK, NULL); // PTM0 is used
+	gpio_request(GPIO_FN_SCIF0_SCK, NULL);
 	gpio_request(GPIO_FN_SCIF0_TXD, NULL);
 	gpio_request(GPIO_FN_SCIF0_RXD, NULL);
 	gpio_request(GPIO_FN_SCIF1_SCK, NULL);
@@ -436,7 +433,6 @@ static int __init actlinux_beta_arch_init(void)
 	gpio_request(GPIO_FN_SDHI1D2,  NULL);
 	gpio_request(GPIO_FN_SDHI1D1,  NULL);
 	gpio_request(GPIO_FN_SDHI1D0,  NULL);
-	gpio_request_one(GPIO_PTM0, GPIOF_OUT_INIT_LOW, NULL);
 
 	/* I/O buffer drive ability is high for SDHI1 */
 	__raw_writew((__raw_readw(IODRIVEA) & ~0x3000) | 0x2000 , IODRIVEA);
