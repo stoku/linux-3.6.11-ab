@@ -102,8 +102,8 @@ static struct r8a66597_platdata usb0_host_data = {
 
 static struct resource usb0_host_resources[] = {
 	[0] = {
-		.start	= 0xa4d80000,
-		.end	= 0xa4d80124 - 1,
+		.start	= 0x04d80000,
+		.end	= 0x04d80124 - 1,
 		.flags	= IORESOURCE_MEM,
 	},
 	[1] = {
@@ -139,8 +139,8 @@ static struct r8a66597_platdata usb1_host_data = {
 
 static struct resource usb1_host_resources[] = {
 	[0] = {
-		.start	= 0xa4d90000,
-		.end	= 0xa4d90124 - 1,
+		.start	= 0x04d90000,
+		.end	= 0x04d90124 - 1,
 		.flags	= IORESOURCE_MEM,
 	},
 	[1] = {

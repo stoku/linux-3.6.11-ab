@@ -603,8 +603,12 @@ static void __init pmb_synchronize(void)
 			/*
 			 * Invalidate anything out of bounds.
 			 */
-			writel_uncached(addr_val & ~PMB_V, addr);
-			writel_uncached(data_val & ~PMB_V, data);
+			/*
+			 * Commented them out since these removes
+			 * uncached HPB area.
+			 */
+			//writel_uncached(addr_val & ~PMB_V, addr);
+			//writel_uncached(data_val & ~PMB_V, data);
 			continue;
 		}
 
